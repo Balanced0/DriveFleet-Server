@@ -55,6 +55,19 @@ async function run() {
       const result = await carsCollection.deleteOne({ _id: new ObjectId(id) });
       res.json(result);
     });
+
+    app.get("/cars/detail/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await carsCollection.findOne({ _id: new ObjectId(id) });
+      res.json(result);
+    });
+
+    const bookingCollection = db.collection("booking");
+    app.post("/booking", async (req, res) => {
+      const bookingData = req.body;
+      const result = await bookingCollection.insertOne(bookingData);
+      res.json(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("DriveFleet").command({ ping: 1 });
     console.log(
