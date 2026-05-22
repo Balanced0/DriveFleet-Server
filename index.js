@@ -34,6 +34,11 @@ async function run() {
       const result = await carsCollection.find().toArray();
       res.json(result);
     });
+
+    app.get("/cars/:userId", async (req, res) => {
+      const result = await carsCollection.find().toArray();
+      res.json(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("DriveFleet").command({ ping: 1 });
     console.log(
