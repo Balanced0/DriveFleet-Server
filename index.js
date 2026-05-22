@@ -50,6 +50,11 @@ async function run() {
 
       res.json(result);
     });
+    app.delete("/cars/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await carsCollection.deleteOne({ _id: new ObjectId(id) });
+      res.json(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("DriveFleet").command({ ping: 1 });
     console.log(
