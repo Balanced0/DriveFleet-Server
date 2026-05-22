@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 dotenv.config();
 const port = process.env.PORT;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = process.env.MONGO_URI;
 app.use(cors());
 app.use(express.json());
@@ -34,9 +34,20 @@ async function run() {
       const result = await carsCollection.find().toArray();
       res.json(result);
     });
-
     app.get("/cars/:userId", async (req, res) => {
-      const result = await carsCollection.find().toArray();
+      const { userId } = req.params;
+      const result = await carsCollection.find({ userId }).toArray();
+      res.json(result);
+    });
+    app.patch("/cars/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+
+      const result = await carsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedData },
+      );
+
       res.json(result);
     });
     // Send a ping to confirm a successful connection
