@@ -30,15 +30,12 @@ async function run() {
       const result = await carsCollection.insertOne(carData);
       res.json(result);
     });
+
     app.get("/cars", async (req, res) => {
       const result = await carsCollection.find().toArray();
       res.json(result);
     });
-    app.get("/cars/:userId", async (req, res) => {
-      const { userId } = req.params;
-      const result = await carsCollection.find({ userId }).toArray();
-      res.json(result);
-    });
+
     app.patch("/cars/:id", async (req, res) => {
       const { id } = req.params;
       const updatedData = req.body;
@@ -50,15 +47,35 @@ async function run() {
 
       res.json(result);
     });
+
     app.delete("/cars/:id", async (req, res) => {
       const { id } = req.params;
       const result = await carsCollection.deleteOne({ _id: new ObjectId(id) });
       res.json(result);
     });
 
+    app.get("/cars/search", async (req, res) => {
+      const { carName, carType } = req.query;
+      const query = {};
+      if (carName) {
+        query.carName = { $regex: carName, $options: "i" };
+      }
+      if (carType) {
+        query.carType = { $regex: carType, $options: "i" };
+      }
+      const result = await carsCollection.find(query).toArray();
+      res.json(result);
+    });
+
     app.get("/cars/detail/:id", async (req, res) => {
       const { id } = req.params;
       const result = await carsCollection.findOne({ _id: new ObjectId(id) });
+      res.json(result);
+    });
+
+    app.get("/cars/:userId", async (req, res) => {
+      const { userId } = req.params;
+      const result = await carsCollection.find({ userId }).toArray();
       res.json(result);
     });
 
@@ -77,6 +94,7 @@ async function run() {
       const result = await bookingCollection.insertOne(bookingData);
       res.json(result);
     });
+
     app.get("/booking/:userId", async (req, res) => {
       const { userId } = req.params;
       const result = await bookingCollection.find({ userId }).toArray();
