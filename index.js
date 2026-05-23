@@ -95,7 +95,15 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/booking/:userId", async (req, res) => {
+    app.get("/booking/:userId", (req, res, next)=>{
+      const header = req.headers.authorization;
+      if(header === "logged in"){
+        next()
+      }
+      else{
+        res.status(401).json({message: "Unauthorized"});
+      }
+    }, async (req, res,) => {
       const { userId } = req.params;
       const result = await bookingCollection.find({ userId }).toArray();
       res.json(result);
