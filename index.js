@@ -38,6 +38,7 @@ const verifyToken = async (req, res, next) => {
     console.log(payload);
     next();
   } catch (error) {
+    console.log("JWT Error:", error.message);
     return res.status(403).json({ message: "Forbidden" });
   }
 };
@@ -97,7 +98,7 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/cars/:userId", async (req, res) => {
+    app.get("/cars/:userId", verifyToken, async (req, res) => {
       const { userId } = req.params;
       const result = await carsCollection.find({ userId }).toArray();
       res.json(result);
@@ -124,7 +125,7 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/booking/:userId", async (req, res) => {
+    app.get("/booking/:userId", verifyToken, async (req, res) => {
       const { userId } = req.params;
       const result = await bookingCollection.find({ userId }).toArray();
       res.json(result);
