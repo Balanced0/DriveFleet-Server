@@ -24,11 +24,11 @@ const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
 const verifyToken = async (req, res, next) => {
   const header = req.headers.authorization;
   if (!header) {
-    res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
   const token = header.split(" ")[1];
   if (!token) {
-    res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
@@ -47,7 +47,7 @@ async function run() {
     const db = client.db("DriveFleet");
     const carsCollection = db.collection("cars");
 
-    app.post("/cars", async (req, res) => {
+    app.post("/cars",verifyToken, async (req, res) => {
       const carData = req.body;
       const result = await carsCollection.insertOne(carData);
       res.json(result);
@@ -95,14 +95,14 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/cars/:userId", async (req, res) => {
+    app.get("/cars/:userId",verifyToken, async (req, res) => {
       const { userId } = req.params;
       const result = await carsCollection.find({ userId }).toArray();
       res.json(result);
     });
 
     const bookingCollection = db.collection("booking");
-    app.post("/booking", async (req, res) => {
+    app.post("/booking",verifyToken, async (req, res) => {
       const bookingData = req.body;
       const exist = await bookingCollection.findOne({
         userId: bookingData.userId,
