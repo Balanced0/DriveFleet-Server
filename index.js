@@ -47,7 +47,7 @@ async function run() {
     const db = client.db("DriveFleet");
     const carsCollection = db.collection("cars");
 
-    app.post("/cars",verifyToken, async (req, res) => {
+    app.post("/cars", verifyToken, async (req, res) => {
       const carData = req.body;
       const result = await carsCollection.insertOne(carData);
       res.json(result);
@@ -95,14 +95,15 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/cars/:userId",verifyToken, async (req, res) => {
+    app.get("/cars/:userId", verifyToken, async (req, res) => {
       const { userId } = req.params;
       const result = await carsCollection.find({ userId }).toArray();
       res.json(result);
     });
 
+    const usersCollection = db.collection("user");
     const bookingCollection = db.collection("booking");
-    app.post("/booking",verifyToken, async (req, res) => {
+    app.post("/booking", verifyToken, async (req, res) => {
       const bookingData = req.body;
       const exist = await bookingCollection.findOne({
         userId: bookingData.userId,
@@ -114,6 +115,10 @@ async function run() {
           .json({ message: "You have already booked this car" });
       }
       const result = await bookingCollection.insertOne(bookingData);
+      await usersCollection.updateOne(
+        { _id: new ObjectId(bookingData.userId) },
+        { $inc: { bookingCount: 1 } },
+      );
       res.json(result);
     });
 
