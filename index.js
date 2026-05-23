@@ -69,12 +69,17 @@ async function run() {
         userId: bookingData.userId,
         carName: bookingData.carName,
       });
-      if (existing) {
+      if (exist) {
         return res
           .status(400)
           .json({ message: "You have already booked this car" });
       }
       const result = await bookingCollection.insertOne(bookingData);
+      res.json(result);
+    });
+    app.get("/booking/:userId", async (req, res) => {
+      const { userId } = req.params;
+      const result = await bookingCollection.find({ userId }).toArray();
       res.json(result);
     });
     // Send a ping to confirm a successful connection
