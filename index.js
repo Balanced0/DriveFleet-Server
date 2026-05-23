@@ -8,6 +8,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = process.env.MONGO_URI;
 app.use(cors());
 app.use(express.json());
+const { jwtVerify, createRemoteJWKSet } = require("jose-cjs");
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -17,6 +18,27 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
+
+const verifyToken = async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header) {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+  const token = header.split(" ")[1];
+  if (!token) {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const { payload } = await jwtVerify(token, JWKS);
+    console.log(payload);
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+};
 
 async function run() {
   try {
@@ -95,15 +117,7 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/booking/:userId", (req, res, next)=>{
-      const header = req.headers.authorization;
-      if(header === "logged in"){
-        next()
-      }
-      else{
-        res.status(401).json({message: "Unauthorized"});
-      }
-    }, async (req, res,) => {
+    app.get("/booking/:userId", verifyToken, async (req, res) => {
       const { userId } = req.params;
       const result = await bookingCollection.find({ userId }).toArray();
       res.json(result);
