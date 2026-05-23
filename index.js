@@ -65,6 +65,15 @@ async function run() {
     const bookingCollection = db.collection("booking");
     app.post("/booking", async (req, res) => {
       const bookingData = req.body;
+      const exist = await bookingCollection.findOne({
+        userId: bookingData.userId,
+        carName: bookingData.carName,
+      });
+      if (existing) {
+        return res
+          .status(400)
+          .json({ message: "You have already booked this car" });
+      }
       const result = await bookingCollection.insertOne(bookingData);
       res.json(result);
     });
